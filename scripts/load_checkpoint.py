@@ -36,6 +36,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from membrane.audit import AuditLog
 from membrane.calibration import calibrate, default_corpus
 from membrane.interceptor import IntegrityMembrane, Mode, TraceLevel
+from membrane.policy import TokenPolicy
 from runtime.engine import CleanRoomEngine
 from transformer.config import ModelConfig
 from transformer.model import CleanRoomTransformer
@@ -118,7 +119,16 @@ def build_engine(model: CleanRoomTransformer, cfg: ModelConfig,
     profile  = calibrate(model, cfg, default_corpus(cfg), margin=1.5)
     key      = Ed25519PrivateKey.generate()
     log      = AuditLog(audit_dir, key) if audit_dir else None
-    membrane = IntegrityMembrane(profile, mode=Mode.ENFORCE, trace=TraceLevel.SUMMARY)
+    policy   = TokenPolicy(cfg.vocab_size)
+    membrane = IntegrityMembrane(
+        cfg=cfg,
+        policy=policy,
+        profile=profile,
+        audit=log,
+        mode=Mode.ENFORCE,
+        trace=TraceLevel.SUMMARY,
+        weight_fingerprint=model.weight_fingerprint(),
+    )
     return CleanRoomEngine(model=model, membrane=membrane, audit=log)
 
 

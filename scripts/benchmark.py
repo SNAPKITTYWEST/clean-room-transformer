@@ -19,6 +19,7 @@ if str(SRC) not in sys.path:
 from membrane.calibration import calibrate, default_corpus
 from membrane.interceptor import IntegrityMembrane, Mode, TraceLevel
 from membrane.audit import AuditLog
+from membrane.policy import TokenPolicy
 from runtime.engine import CleanRoomEngine
 from transformer.config import ModelConfig
 from transformer.model import CleanRoomTransformer
@@ -28,12 +29,21 @@ import os
 
 
 def _make_engine(cfg: ModelConfig, mode: Mode, audit_dir: str | None = None) -> CleanRoomEngine:
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
     model   = CleanRoomTransformer(cfg)
     profile = calibrate(model, cfg, default_corpus(cfg), margin=1.5)
-    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
     key     = Ed25519PrivateKey.generate()
     log     = AuditLog(audit_dir, key) if audit_dir else None
-    membrane = IntegrityMembrane(profile, mode=mode, trace=TraceLevel.NONE)
+    policy  = TokenPolicy(cfg.vocab_size)
+    membrane = IntegrityMembrane(
+        cfg=cfg,
+        policy=policy,
+        profile=profile,
+        audit=log,
+        mode=mode,
+        trace=TraceLevel.NONE,
+        weight_fingerprint=model.weight_fingerprint(),
+    )
     return CleanRoomEngine(model=model, membrane=membrane, audit=log)
 
 
