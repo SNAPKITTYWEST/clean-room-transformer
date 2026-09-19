@@ -166,6 +166,8 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as audit_dir:
         engine = build_engine(model, cfg, audit_dir)
         result = engine.generate(prompt_tokens, max_new_tokens=args.tokens)
+        if engine.audit is not None:
+            engine.audit.close()
 
     print(f"\nstatus      : {result.status.value}")
     if result.emitted:

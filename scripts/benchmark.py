@@ -62,6 +62,8 @@ def bench_throughput(cfg: ModelConfig, max_tokens: int, runs: int) -> dict:
             t1     = time.perf_counter()
             times.append(t1 - t0)
             tokens_emitted.append(len(result.emitted))
+        if engine.audit is not None:
+            engine.audit.close()
 
     total_tok = sum(tokens_emitted)
     total_sec = sum(times)
@@ -87,7 +89,6 @@ def bench_step_latency(cfg: ModelConfig, max_tokens: int, runs: int) -> dict:
         engine = _make_engine(cfg, Mode.ENFORCE, tmp)
         engine.generate(prompt, max_new_tokens=2)  # warm-up
         for _ in range(runs):
-            # patch generate to record per-step times
             _orig = engine.model.forward
             _step_start: list[float] = []
             _step_end:   list[float] = []
@@ -103,6 +104,8 @@ def bench_step_latency(cfg: ModelConfig, max_tokens: int, runs: int) -> dict:
             engine.model.forward = _orig
             for s, e in zip(_step_start, _step_end):
                 step_times.append((e - s) * 1000)  # ms
+        if engine.audit is not None:
+            engine.audit.close()
 
     return {
         "samples":           len(step_times),
@@ -125,6 +128,8 @@ def bench_membrane_overhead(cfg: ModelConfig, max_tokens: int, runs: int) -> dic
                 t0 = time.perf_counter()
                 engine.generate(prompt, max_new_tokens=max_tokens)
                 times[mode_name].append(time.perf_counter() - t0)
+            if engine.audit is not None:
+                engine.audit.close()
 
     e_mean = statistics.mean(times["enforce"])
     m_mean = statistics.mean(times["monitor"])
