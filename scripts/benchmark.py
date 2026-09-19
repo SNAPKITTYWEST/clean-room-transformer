@@ -33,7 +33,7 @@ def _make_engine(cfg: ModelConfig, mode: Mode, audit_dir: str | None = None) -> 
     model   = CleanRoomTransformer(cfg)
     profile = calibrate(model, cfg, default_corpus(cfg), margin=1.5)
     key     = Ed25519PrivateKey.generate()
-    log     = AuditLog(audit_dir, key) if audit_dir else None
+    log     = AuditLog(Path(audit_dir) / "audit.jsonl", key) if audit_dir else None
     policy  = TokenPolicy(cfg.vocab_size)
     membrane = IntegrityMembrane(
         cfg=cfg,
