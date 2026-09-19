@@ -1,0 +1,3 @@
+# Verification-only dependency. Not imported by anything under src/ --
+# tests/test_isolation.py enforces that.
+pytest==9.1.1
