@@ -26,17 +26,19 @@ import sys
 import tempfile
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+SRC = Path(__file__).resolve().parents[1] / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
 import numpy as np
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from src.membrane.audit import AuditLog
-from src.membrane.calibration import calibrate, default_corpus
-from src.membrane.interceptor import IntegrityMembrane, Mode, TraceLevel
-from src.runtime.engine import CleanRoomEngine
-from src.transformer.config import ModelConfig
-from src.transformer.model import CleanRoomTransformer
+from membrane.audit import AuditLog
+from membrane.calibration import calibrate, default_corpus
+from membrane.interceptor import IntegrityMembrane, Mode, TraceLevel
+from runtime.engine import CleanRoomEngine
+from transformer.config import ModelConfig
+from transformer.model import CleanRoomTransformer
 
 
 # ── serialisation helpers ────────────────────────────────────────────────────

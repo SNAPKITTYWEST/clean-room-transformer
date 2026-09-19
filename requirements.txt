@@ -14,7 +14,8 @@
 # Do not replace a mismatching hash without checking why it changed.
 
 numpy==2.4.4 \
-    --hash=sha256:df3775294accfdd75f32c74ae39fcba920c9a378a2fc18a12b6820aa8c1fb502
+    --hash=sha256:df3775294accfdd75f32c74ae39fcba920c9a378a2fc18a12b6820aa8c1fb502 \
+    --hash=sha256:b5f0362dc928a6ecd9db58868fca5e48485205e3855957bdedea308f8672ea4a
 
 cryptography==46.0.7 \
     --hash=sha256:42a1e5f98abb6391717978baf9f90dc28a743b7d9be7f0751a6f56a75d14065b
